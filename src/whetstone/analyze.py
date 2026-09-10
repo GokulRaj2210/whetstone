@@ -27,6 +27,10 @@ class Analysis:
     paired_tasks: tuple[str, ...]
     #: Records that recorded an error, kept in the denominator and flagged here.
     failed_runs: int
+    #: Records where the agent never ran at all. Excluded from the pairing and
+    #: reported loudly: an experiment half of whose runs were refusals must not
+    #: render as a clean table.
+    unexecuted_runs: int
     #: Spec digests found among the records. More than one is a mixed set.
     digests: tuple[str, ...]
 
@@ -96,7 +100,8 @@ def analyze(experiment: Experiment, records: Sequence[RunRecord]) -> Analysis:
         experiment=experiment,
         estimates=final,
         paired_tasks=paired,
-        failed_runs=sum(1 for record in records if record.error),
+        failed_runs=sum(1 for record in records if record.error and record.executed),
+        unexecuted_runs=sum(1 for record in records if not record.executed),
         digests=tuple(sorted(results_mod.digests(records))),
     )
 

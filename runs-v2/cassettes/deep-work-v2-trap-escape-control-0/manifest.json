@@ -1,0 +1,24 @@
+{
+  "agent": "claude-code",
+  "content_hash": "54a3287f62ad88d62e5b25524fd0eb9f04dc56e861079ec67c3567ea1271a01a",
+  "format_version": 1,
+  "kind": "observed",
+  "labels": {
+    "available_tools": "27",
+    "claude_code_version": "2.1.267",
+    "ingested_from": ".whetstone-run.jsonl",
+    "is_error": "true",
+    "num_turns": "1",
+    "permissionMode": "default",
+    "reported_cost_usd": "0.000000",
+    "result": "success",
+    "session_id": "73227752-9b95-4ec8-b9de-d1dd1a117579"
+  },
+  "model": "claude-opus-5",
+  "name": "deep-work-v2-trap-escape-control-0",
+  "provider": "anthropic",
+  "recorder_version": "0.1.0",
+  "redactions": 0,
+  "source": "claude-code",
+  "wall_duration_ms": 769
+}

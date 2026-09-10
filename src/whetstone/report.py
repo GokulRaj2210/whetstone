@@ -51,6 +51,12 @@ def console_report(analysis: Analysis, console: Console) -> None:
             f"  [red]spec mismatch[/red]: records carry {', '.join(analysis.digests)} but this "
             f"spec is {experiment.digest}. These runs were made under a different declaration."
         )
+    if analysis.unexecuted_runs:
+        console.print(
+            f"  [red]{analysis.unexecuted_runs} run(s) never executed[/red] and are excluded "
+            "from every figure below. The agent was refused before it started -- usually a "
+            "session usage limit -- so those tasks are absent, not failed."
+        )
     if analysis.failed_runs:
         console.print(
             f"  [yellow]{analysis.failed_runs} run(s) errored or timed out[/yellow] "
@@ -115,6 +121,13 @@ def markdown_report(analysis: Analysis) -> str:
             f"[{estimate.ci_low:+.2f}, {estimate.ci_high:+.2f}] | "
             f"{estimate.p_adjusted:.3f} | {_mde(estimate, plain=True)} | "
             f"{verdict} |"
+        )
+    if analysis.unexecuted_runs:
+        lines.insert(
+            3,
+            f"> **{analysis.unexecuted_runs} run(s) never executed** and are excluded. The "
+            "agent was refused before it started, so those tasks are absent from the pairing "
+            "rather than counted as failures.\n",
         )
     lines.extend(["", *(f"- {line}" for line in _caveats(analysis, plain=True))])
     return "\n".join(lines)

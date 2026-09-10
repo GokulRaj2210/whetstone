@@ -39,9 +39,22 @@ class RunRecord:
     touched: list[str] = field(default_factory=list)
     #: Where the ingested cassette lives, relative to the results directory.
     cassette: str = ""
-    #: Set when the run itself failed (timeout, crash). The record is still
-    #: written: a run that times out is data, not an error to be swallowed.
+    #: Set when the run itself failed (timeout, crash, refusal). The record is
+    #: still written either way -- see `executed` for what may be analysed.
     error: str | None = None
+    #: Did the agent actually get to work on the task?
+    #:
+    #: The distinction this draws is load-bearing. A run that *ran and timed
+    #: out* is evidence about the intervention -- the skill may be what made it
+    #: slow -- and belongs in the analysis. A run that never started, because
+    #: the session hit its usage limit and the CLI returned a one-line refusal,
+    #: is evidence about nothing.
+    #:
+    #: Conflating them is not a small error. Sixteen of this project's own v2
+    #: runs were refusals, and every one was recorded as `task_success: false`,
+    #: which is indistinguishable from the agent trying and failing. The
+    #: experiment read as "the skill makes things worse".
+    executed: bool = True
 
     @property
     def key(self) -> tuple[str, str, int]:
@@ -112,12 +125,17 @@ def pair_by_task(
     design was built to cancel.
 
     A task missing from either arm is dropped, and the caller is told which
-    tasks survived so the report can say how many pairs it actually had.
+    tasks survived so the report can say how many pairs it actually had. Runs
+    that never executed are dropped first, for the same reason -- and because a
+    task whose runs were all refusals then disappears from the pairing entirely
+    rather than contributing a fabricated pair of failures.
     """
     grouped: dict[tuple[str, str], list[float]] = {}
     for record in records:
         if record.arm not in (baseline, treatment):
             continue
+        if not record.executed:
+            continue  # never ran; not evidence either way
         grouped.setdefault((record.task, record.arm), []).append(record.value(metric))
 
     tasks = sorted({task for task, _ in grouped})

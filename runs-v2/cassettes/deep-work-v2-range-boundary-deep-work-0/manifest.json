@@ -1,0 +1,23 @@
+{
+  "agent": "claude-code",
+  "content_hash": "d23a95e94e5e5383df3f196e44032e43fb4bee92dccbbbe49ee6a93ef8441c73",
+  "format_version": 1,
+  "kind": "observed",
+  "labels": {
+    "available_tools": "27",
+    "claude_code_version": "2.1.267",
+    "ingested_from": ".whetstone-run.jsonl",
+    "num_turns": "13",
+    "permissionMode": "default",
+    "reported_cost_usd": "0.364385",
+    "result": "success",
+    "session_id": "4d025a52-7a88-40eb-9187-c8a667ea7bcb"
+  },
+  "model": "claude-opus-5",
+  "name": "deep-work-v2-range-boundary-deep-work-0",
+  "provider": "anthropic",
+  "recorder_version": "0.1.0",
+  "redactions": 0,
+  "source": "claude-code",
+  "wall_duration_ms": 60945
+}

@@ -28,6 +28,7 @@ from pathlib import Path
 
 from flightrec.cassette import store
 from flightrec.evals import metrics as flightrec_metrics
+from flightrec.models import Cassette
 from flightrec.sources import claude_code
 
 from whetstone.extract import observe
@@ -39,6 +40,11 @@ from whetstone.tasks import Task
 #: the comparison with a capability change, and the skill is meant to alter how
 #: the tools are used, not which exist.
 ALLOWED_TOOLS = "Read,Write,Edit,Bash,Grep,Glob"
+
+#: The CLI answers a refused request with a single synthetic turn and no tools.
+#: Detected rather than inferred from emptiness alone, because a legitimately
+#: trivial run could also make no tool calls.
+_REFUSAL_MODEL = "<synthetic>"
 
 #: Metrics taken from flightrec rather than recomputed here.
 COST_METRICS = (
@@ -146,6 +152,12 @@ class Runner:
         path = store.save(cassette, root=self.cassettes_dir)
         record.cassette = str(Path(path).relative_to(self.cassettes_dir.parent))
 
+        refusal = _refusal_text(cassette)
+        if refusal is not None:
+            record.executed = False
+            record.error = f"the agent never ran: {refusal}"
+            return
+
         behaviour = observe(cassette)
         record.metrics.update(behaviour.as_metrics())
         record.touched = behaviour.touched_paths
@@ -177,6 +189,25 @@ class Runner:
         becomes the effect you measured.
         """
         shutil.rmtree(workdir / ".claude", ignore_errors=True)
+
+
+def _refusal_text(cassette: Cassette) -> str | None:
+    """The message, when the CLI declined to run at all.
+
+    A usage-limit refusal comes back as one synthetic assistant turn carrying
+    the explanation, `is_error` set on the result, and no tool calls. That is
+    not a failed attempt at the task and must never be scored as one.
+    """
+    if cassette.tool_calls:
+        return None
+    if str(cassette.meta.labels.get("is_error", "")).lower() != "true":
+        return None
+    for span in cassette.llm_calls:
+        if span.model == _REFUSAL_MODEL and span.response:
+            for block in span.response.get("content", []):
+                if isinstance(block, dict) and block.get("type") == "text":
+                    return str(block.get("text", "")).strip()[:200]
+    return "no tool calls and the result was flagged as an error"
 
 
 def available(claude_bin: str = "claude") -> bool:

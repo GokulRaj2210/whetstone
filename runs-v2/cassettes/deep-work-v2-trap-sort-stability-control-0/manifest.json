@@ -1,0 +1,24 @@
+{
+  "agent": "claude-code",
+  "content_hash": "ff03c9fe973f79bf05b320b565db09bb090ed78a68d0c23a7b719bac7db7bf90",
+  "format_version": 1,
+  "kind": "observed",
+  "labels": {
+    "available_tools": "27",
+    "claude_code_version": "2.1.267",
+    "ingested_from": ".whetstone-run.jsonl",
+    "is_error": "true",
+    "num_turns": "1",
+    "permissionMode": "default",
+    "reported_cost_usd": "0.000000",
+    "result": "success",
+    "session_id": "7a03f295-2190-4b88-98bc-dd018aae388a"
+  },
+  "model": "claude-opus-5",
+  "name": "deep-work-v2-trap-sort-stability-control-0",
+  "provider": "anthropic",
+  "recorder_version": "0.1.0",
+  "redactions": 0,
+  "source": "claude-code",
+  "wall_duration_ms": 740
+}

@@ -168,6 +168,49 @@ def test_a_mixed_set_of_spec_digests_is_flagged() -> None:
     assert not analysis.digest_matches
 
 
+def test_a_run_that_never_executed_is_excluded_not_scored_as_a_failure() -> None:
+    """The distinction that saved this project's v2 experiment from a false result.
+
+    Sixteen of thirty v2 runs were session-limit refusals. Recorded as ordinary
+    failures they made the table read "the skill makes things worse"; excluded,
+    the tasks simply drop out of the pairing. A run that never started is not
+    evidence about the intervention.
+    """
+    spec = Experiment.from_dict(SPEC)
+    good = [
+        record("a", "control", 0, reads=1.0, task_success=1.0),
+        record("a", "treat", 0, reads=2.0, task_success=1.0),
+    ]
+    refused = []
+    for arm in ("control", "treat"):
+        r = record("b", arm, 0, reads=0.0, task_success=0.0)
+        r.executed = False
+        r.error = "the agent never ran: session limit"
+        refused.append(r)
+
+    analysis = analyze(spec, [*good, *refused])
+    assert analysis.unexecuted_runs == 2
+    assert analysis.paired_tasks == ("a",), "task b never ran, so it is not a pair"
+    success = next(e for e in analysis.estimates if e.metric == "task_success")
+    assert success.baseline_mean == 1.0, "the refusals must not drag the rate down"
+
+
+def test_a_timeout_is_kept_because_the_agent_did_run() -> None:
+    """The other side of the same line.
+
+    A run that started and ran out of clock is evidence -- the skill may be what
+    made it slow -- so it stays in.
+    """
+    spec = Experiment.from_dict(SPEC)
+    good = record("a", "control", 0, reads=1.0, task_success=1.0)
+    slow = record("a", "treat", 0, reads=9.0, task_success=0.0)
+    slow.error = "timed out after 600s"
+    analysis = analyze(spec, [good, slow])
+    assert analysis.unexecuted_runs == 0
+    assert analysis.failed_runs == 1
+    assert analysis.paired_tasks == ("a",)
+
+
 def test_errored_runs_are_counted_not_discarded() -> None:
     """A run that timed out is data. Dropping it would bias toward the arm that
     finished, which is exactly the arm the skill might be slowing down."""

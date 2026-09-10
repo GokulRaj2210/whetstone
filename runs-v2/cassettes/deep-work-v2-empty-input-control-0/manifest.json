@@ -1,0 +1,23 @@
+{
+  "agent": "claude-code",
+  "content_hash": "389aaf2eda7cb08b4971ab771d0076a676d29121340bf78e65051a9c8b5d560b",
+  "format_version": 1,
+  "kind": "observed",
+  "labels": {
+    "available_tools": "27",
+    "claude_code_version": "2.1.267",
+    "ingested_from": ".whetstone-run.jsonl",
+    "num_turns": "8",
+    "permissionMode": "default",
+    "reported_cost_usd": "0.175325",
+    "result": "success",
+    "session_id": "f270fc6d-e7c6-4403-a47f-fa58fa9f0d42"
+  },
+  "model": "claude-opus-5",
+  "name": "deep-work-v2-empty-input-control-0",
+  "provider": "anthropic",
+  "recorder_version": "0.1.0",
+  "redactions": 0,
+  "source": "claude-code",
+  "wall_duration_ms": 22104
+}

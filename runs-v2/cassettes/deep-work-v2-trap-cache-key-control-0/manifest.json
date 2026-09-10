@@ -1,0 +1,24 @@
+{
+  "agent": "claude-code",
+  "content_hash": "d9a36752d685bcd0b744bddc03fe42f409cb0ea4bfe8be0e6b3103917323df50",
+  "format_version": 1,
+  "kind": "observed",
+  "labels": {
+    "available_tools": "27",
+    "claude_code_version": "2.1.267",
+    "ingested_from": ".whetstone-run.jsonl",
+    "is_error": "true",
+    "num_turns": "1",
+    "permissionMode": "default",
+    "reported_cost_usd": "0.000000",
+    "result": "success",
+    "session_id": "c128b37e-8edf-4352-b315-fb98ac13c387"
+  },
+  "model": "claude-opus-5",
+  "name": "deep-work-v2-trap-cache-key-control-0",
+  "provider": "anthropic",
+  "recorder_version": "0.1.0",
+  "redactions": 0,
+  "source": "claude-code",
+  "wall_duration_ms": 738
+}

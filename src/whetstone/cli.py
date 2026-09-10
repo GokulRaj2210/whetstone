@@ -129,6 +129,7 @@ def remeasure(
     """
     from flightrec.cassette import store
 
+    from whetstone.capture import _refusal_text
     from whetstone.extract import observe
 
     records = results_mod.load(results)
@@ -156,15 +157,30 @@ def remeasure(
         if path is None or not path.exists():
             missing += 1
             continue
-        behaviour = observe(store.load(path))
+        cassette = store.load(path)
+
+        # Re-derive whether the agent ran at all, not just what it did. Records
+        # written before refusal detection existed carry `executed: true` and a
+        # fabricated `task_success: false`; this is what corrects them.
+        refusal = _refusal_text(cassette)
+        behaviour = observe(cassette)
         fresh = behaviour.as_metrics()
-        if any(record.metrics.get(k) != v for k, v in fresh.items()):
+
+        if refusal is not None and record.executed:
+            record.executed = False
+            record.error = f"the agent never ran: {refusal}"
+            record.task_success = False
             changed += 1
+        elif any(record.metrics.get(k) != v for k, v in fresh.items()):
+            changed += 1
+
         record.metrics.update(fresh)
         record.touched = behaviour.touched_paths
 
+    refused = sum(1 for r in records if not r.executed)
     console.print(
         f"{len(records)} record(s) · {changed} changed"
+        + (f" · [red]{refused} never executed[/red]" if refused else "")
         + (f" · [yellow]{missing} cassette(s) missing[/yellow]" if missing else "")
     )
     if dry_run:
