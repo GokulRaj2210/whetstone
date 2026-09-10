@@ -26,9 +26,10 @@ uv run whet report experiments/deep-work.yaml     # no model, no key, no network
 **The skill reliably produces a regression test where the control produced
 none, and that is attributable to what it says rather than to the act of
 invoking it. It did not make the agent verify its work — both arms already did,
-and it changed the method. Whether any of this yields better code is not
-something this experiment could answer, and on the single task that could have
-discriminated, it did not help.**
+and it changed the method. On correctness there is no detectable effect in
+either experiment, and the direction is mildly negative.** ([v2 below](#v2)
+replicates the behavioural finding on independent runs and answers the
+correctness question that v1 could not.)
 
 Both of those qualifications were discovered *after* the first writeup, by
 reading the transcripts instead of the summary table. They are the most useful
@@ -208,75 +209,100 @@ been silently corrected would be one nobody could check.
 
 ---
 
-## <a name="v2"></a>v2: the experiment that did not run
+## <a name="v2"></a>v2: the answer, and why the experiment argued against itself
 
 v1 left one question open — does the behaviour change produce better code? — and
-diagnosed exactly why it could not answer it. v2 was built to answer it: six
-regression traps, each verified to discriminate without a model, and a power
-check confirming six was the minimum that could resolve anything.
+diagnosed why it could not answer it. v2 was built to answer it: six regression
+traps, each verified to discriminate without a model, sized against the power
+floor.
 
-**Then the session hit its usage limit partway through, and every remaining run
-was refused.** Tasks run alphabetically; everything from `strip-order` onward
-came back as a single synthetic turn reading *"You've hit your session limit"*.
-All six traps were in that tail. The experiment that was built to answer the
-question is the part that did not execute.
+**The pre-registered prediction was that `task_success` would improve, and that
+the improvement would come from the trap tasks. It did not.** The traps came out
+**6/6 in both arms.**
 
-Pre-registered spec `458951ddd581` · 7 paired tasks · 1 repeats per arm · two-sided, alpha 0.05, Holm-corrected across the metric family.
+Pre-registered spec `458951ddd581` · 15 paired tasks · 1 repeats per arm · two-sided, alpha 0.05, Holm-corrected across the metric family.
 > **16 run(s) never executed** and are excluded. The agent was refused before it started, so those tasks are absent from the pairing rather than counted as failures.
 
 
 | Metric | Control | +Skill | Delta | 95% CI | p (adj) | MDE | Verdict |
 |---|--:|--:|--:|:--:|--:|--:|---|
-| `task_success` | 1.00 | 0.86 | -0.14 | [-0.43, +0.00] | 1.000 | 0.40 | unresolved |
-| `test_run_after_edit` | 0.14 | 0.86 | +0.71 | [+0.43, +1.00] | 0.188 | 0.52 | unresolved |
-| `files_read_before_first_edit` | 1.86 | 2.43 | +0.57 | [+0.00, +1.00] | 0.188 | 0.83 | unresolved |
-| _verified_after_edit_ | 1.00 | 0.86 | -0.14 | [-0.43, +0.00] | 1.000 | 0.40 | exploratory |
-| _test_run_before_edit_ | 0.00 | 0.14 | +0.14 | [+0.00, +0.43] | 1.000 | 0.40 | exploratory |
+| `task_success` | 0.93 | 0.87 | -0.07 | [-0.20, +0.00] | 1.000 | 0.19 | unresolved |
+| `test_run_after_edit` | 0.47 | 0.93 | **+0.47** | [+0.20, +0.73] | 0.031 | 0.37 | resolved |
+| `files_read_before_first_edit` | 2.00 | 2.80 | **+0.80** | [+0.47, +1.00] | 0.001 | 0.41 | resolved |
+| _verified_after_edit_ | 0.93 | 0.93 | +0.00 | [-0.20, +0.20] | 1.000 | 0.27 | exploratory |
+| _test_run_before_edit_ | 0.00 | 0.53 | +0.53 | [+0.27, +0.80] | 0.008 | 0.37 | exploratory |
 | _repeat_reads_ | 0.00 | 0.00 | +0.00 | [+0.00, +0.00] | 1.000 | — | exploratory |
-| _dead_end_tool_calls_ | 0.71 | 1.71 | +1.00 | [+0.57, +1.43] | 0.000 | 0.61 | exploratory |
-| _searches_before_first_edit_ | 0.43 | 0.86 | +0.43 | [+0.14, +0.86] | 0.036 | 0.57 | exploratory |
-| _files_touched_ | 1.14 | 1.71 | +0.57 | [+0.00, +1.00] | 0.089 | 0.83 | exploratory |
-| _total_tokens_ | 198269.71 | 508666.71 | +310397.00 | [+158489.79, +424946.70] | 0.000 | 211856.30 | exploratory |
-| _tool_calls_ | 6.00 | 12.29 | +6.29 | [+3.00, +8.71] | 0.000 | 4.64 | exploratory |
-| _duration_s_ | 33.32 | 86.54 | +53.22 | [+16.63, +99.19] | 0.001 | 64.22 | exploratory |
+| _dead_end_tool_calls_ | 0.40 | 1.53 | +1.13 | [+0.87, +1.40] | 0.000 | 0.37 | exploratory |
+| _searches_before_first_edit_ | 0.60 | 0.87 | +0.27 | [+0.00, +0.53] | 0.115 | 0.43 | exploratory |
+| _files_touched_ | 1.47 | 2.00 | +0.53 | [+0.20, +0.80] | 0.004 | 0.46 | exploratory |
+| _total_tokens_ | 199542.33 | 530667.13 | +331124.80 | [+248238.41, +401355.28] | 0.000 | 113212.89 | exploratory |
+| _tool_calls_ | 6.60 | 12.93 | +6.33 | [+4.67, +7.60] | 0.000 | 2.23 | exploratory |
+| _duration_s_ | 32.94 | 93.53 | +60.59 | [+33.97, +91.20] | 0.000 | 42.91 | exploratory |
 
-- Nothing resolved at n=7. That is a statement about this experiment's power as much as about the skill -- read the MDE column.
-- Unresolved metrics are not null results: `files_read_before_first_edit` could only have resolved a difference of 0.83 or larger at this sample size.
+- Resolved at n=15: `test_run_after_edit`, `files_read_before_first_edit`.
+- Unresolved metrics are not null results: `task_success` could only have resolved a difference of 0.19 or larger at this sample size.
 - Behaviour and outcome are separate claims. A metric moving means the agent worked differently; only `task_success` speaks to whether the code was right.
 - Italic/dim rows are exploratory: reported uncorrected, and not evidence for a claim. Only the 3 primary metric(s) share the Holm correction.
 
-Nothing resolved at n=7, which is what the power floor predicts. The seven pairs
-that did run reproduce v1 closely — `test_run_after_edit` 0.14 → 0.86,
-`files_read_before_first_edit` 1.86 → 2.43, tokens 198k → 509k — so the v1
-behavioural finding replicates on an independent run. The outcome question is
-still open.
+### Why the traps could not work, which is the actual finding
 
-### What this cost, and what it bought
+Splitting by whether the repo already ships a test file explains everything.
+This split was **not** pre-registered — it is a post-hoc subgroup analysis, and
+it is offered as the hypothesis for v3, not as a result:
 
-The refusals were recorded as `task_success: false` with no error. **A run that
-never happened was indistinguishable from a task the agent tried and failed**,
-and the first version of this table read *"the skill makes things worse"* —
-`task_success` 0.47 → 0.40, `test_run_after_edit` collapsed from v1's 1.00 to
-0.40. Every one of those numbers was an artefact of sixteen runs that never
-started being averaged in as failures.
+| Repo ships a visible test file? | n | control runs the suite | +skill runs the suite | control correct | +skill correct |
+|---|--:|--:|--:|--:|--:|
+| **yes** | 7 | **7/7** | 7/7 | 7/7 | 7/7 |
+| **no** | 8 | **0/8** | 7/8 | 7/8 | 6/8 |
 
-The fix draws a line the harness did not previously have:
+Given a visible test file, **the control agent runs it unprompted, every time**.
+The skill's entire behavioural effect exists only where the repo has no test
+suite to find.
 
-| | | |
-|---|---|---|
-| ran, then timed out | **evidence** — the skill may be what made it slow | kept |
-| ran, then failed | **evidence** | kept |
-| never started (refusal, usage limit) | evidence about nothing | **excluded, and reported loudly** |
+Which makes the trap design self-defeating, and the mistake is instructive. A
+regression trap requires a visible, currently-green suite — that is the whole
+mechanism by which a naive fix gets caught. But making the suite visible is
+exactly what causes the control arm to run it. **The instrument destroyed the
+effect it was built to measure**, and it did so for a reason inherent to the
+design rather than through any oversight in building it.
 
-`whet remeasure` re-derived the distinction from the committed transcripts, so
-correcting sixteen mis-scored records cost nothing and needed no re-run. The
-report now refuses to render a clean table when runs are missing.
-([test](tests/test_capture.py), [test](tests/test_analyze.py))
+### So: did the skill work?
 
-That is the third time in this project that a number looked wrong, and the third
-time the cause was the measurement rather than the skill. It is the argument for
-committing transcripts rather than summaries: all three were found by reading
-what the agent actually did, and all three were fixable after the fact.
+On behaviour, unambiguously, and it replicates across two independent
+experiments:
+
+- Where the repo has no tests, it takes the agent from **0/8** to **7/8** on
+  writing and running one. That is close to a switch.
+- `files_read_before_first_edit` 2.00 → 2.80, resolved.
+- `test_run_before_edit` 0.00 → 0.53: it also moved verification *before* the
+  edit, which v1 never showed.
+
+On correctness, **no**, and the direction is mildly negative in both experiments:
+`task_success` 0.93 → 0.87 overall, 7/8 → 6/8 where the effect is strongest,
+6/6 → 6/6 on the traps. Nothing resolved, and at n=15 the MDE is 0.19 — so an
+improvement smaller than about one task in five would not have been visible. The
+honest statement is *no detectable effect on correctness, with an experiment
+that could only have detected a large one.*
+
+`verified_after_edit` stayed **0.93 → 0.93**, confirming v1's correction on
+independent data: the skill changes *how* the agent verifies, never *whether*.
+
+### What that leaves the skill actually being good for
+
+Writing the regression test the repo does not have. That is a real artifact —
+24/24 runs in v1, 7/8 here — and the control produces it essentially never. It
+costs about 2.7x the tokens. Whether that is worth it is a judgement about how
+much you want the test, and this project cannot tell you the code is better for
+it, because on the evidence it is not.
+
+### v3, if there is one
+
+The split above is the hypothesis: **the skill should help most on repos with no
+tests, and be nearly inert on repos that have them.** Testing it needs tasks
+whose correctness depends on the test being written — where the naive fix passes
+the reported case and a competent test would have caught the rest. That is a
+harder fixture to build than a regression trap, and it is the one the evidence
+now points at.
 
 ---
 
@@ -530,6 +556,10 @@ which handles capture, cassette storage, redaction and cost accounting.
 
 - **It cannot tell you a skill is useless**, only that this experiment could not
   resolve an effect of a given size. Read the MDE column.
+- **A fixture can destroy the effect it was built to measure.** v2's regression
+  traps needed a visible test suite, and a visible test suite is exactly what
+  makes the control arm run the tests. Nothing in the harness can catch that for
+  you; it took reading the per-task results to see it.
 - **n is small.** Eight tasks is eight pairs. Agent runs cost real time, and the
   honest response is to report the resulting limits rather than to pretend n was
   larger.

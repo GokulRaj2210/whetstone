@@ -1,18 +1,17 @@
 {
   "agent": "claude-code",
-  "content_hash": "83feecbfeffb861463dc1154128d7ff36b7377a7f64f12babb1e07f20dd1ff37",
+  "content_hash": "1cac9d9cb377993b246e6921c5868d8dd0f55d31ab15a0efe43968b741336a41",
   "format_version": 1,
   "kind": "observed",
   "labels": {
     "available_tools": "27",
     "claude_code_version": "2.1.267",
     "ingested_from": ".whetstone-run.jsonl",
-    "is_error": "true",
-    "num_turns": "1",
+    "num_turns": "8",
     "permissionMode": "default",
-    "reported_cost_usd": "0.000000",
+    "reported_cost_usd": "0.238828",
     "result": "success",
-    "session_id": "780d6f3d-f3ee-41e8-aef3-2928ba7e6a4d"
+    "session_id": "78465e95-1abc-4777-a6e5-3688bd039e64"
   },
   "model": "claude-opus-5",
   "name": "deep-work-v2-trap-titlecase-control-0",
@@ -20,5 +19,5 @@
   "recorder_version": "0.1.0",
   "redactions": 0,
   "source": "claude-code",
-  "wall_duration_ms": 735
+  "wall_duration_ms": 45265
 }

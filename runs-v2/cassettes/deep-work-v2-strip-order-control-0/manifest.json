@@ -1,18 +1,17 @@
 {
   "agent": "claude-code",
-  "content_hash": "d00dfa0d92bb791fb514cfa310538a73d21091c09d4bd3e8343b6a41c8b3f784",
+  "content_hash": "0610a4b61ddcc2f7d85e9ab3da264963e36e023798b108e5c66913f846fd1a66",
   "format_version": 1,
   "kind": "observed",
   "labels": {
     "available_tools": "27",
     "claude_code_version": "2.1.267",
     "ingested_from": ".whetstone-run.jsonl",
-    "is_error": "true",
-    "num_turns": "1",
+    "num_turns": "9",
     "permissionMode": "default",
-    "reported_cost_usd": "0.000000",
+    "reported_cost_usd": "0.248371",
     "result": "success",
-    "session_id": "b44e1521-f455-4597-9a58-3645e16b4c78"
+    "session_id": "4aa5bfc2-a37c-4d60-88f5-9ff6304d95a4"
   },
   "model": "claude-opus-5",
   "name": "deep-work-v2-strip-order-control-0",
@@ -20,5 +19,5 @@
   "recorder_version": "0.1.0",
   "redactions": 0,
   "source": "claude-code",
-  "wall_duration_ms": 771
+  "wall_duration_ms": 47896
 }

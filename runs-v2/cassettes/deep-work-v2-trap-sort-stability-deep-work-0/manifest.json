@@ -1,18 +1,17 @@
 {
   "agent": "claude-code",
-  "content_hash": "ff2d859ab83fa6c23a69a4f4b2e1417d4d3d1ba80ee9060ace861dce757bfaac",
+  "content_hash": "38c49e2fee0282d30f420e6afd368d48940e36e463b954aa85638173d956b269",
   "format_version": 1,
   "kind": "observed",
   "labels": {
     "available_tools": "27",
     "claude_code_version": "2.1.267",
     "ingested_from": ".whetstone-run.jsonl",
-    "is_error": "true",
-    "num_turns": "1",
+    "num_turns": "15",
     "permissionMode": "default",
-    "reported_cost_usd": "0.000000",
+    "reported_cost_usd": "0.374732",
     "result": "success",
-    "session_id": "94429d10-88ac-41b8-8a47-61850bcb83d7"
+    "session_id": "7f990529-df3f-4935-9148-fdaa135fd7e8"
   },
   "model": "claude-opus-5",
   "name": "deep-work-v2-trap-sort-stability-deep-work-0",
@@ -20,5 +19,5 @@
   "recorder_version": "0.1.0",
   "redactions": 0,
   "source": "claude-code",
-  "wall_duration_ms": 819
+  "wall_duration_ms": 60055
 }

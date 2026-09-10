@@ -41,6 +41,10 @@ def run(
     skills: Annotated[Path, typer.Option("--skills", help="Skill directory.")] = Path("skills"),
     repeats: Annotated[int | None, typer.Option("--repeats", "-k", help="Override spec.")] = None,
     only: Annotated[str | None, typer.Option("--only", help="Run one task by name.")] = None,
+    resume: Annotated[
+        bool,
+        typer.Option("--resume", help="Skip (task, arm, repeat) triples that already ran."),
+    ] = False,
     keep: Annotated[bool, typer.Option("--keep", help="Keep working directories.")] = False,
 ) -> None:
     """Execute the experiment. This is the command that costs model time."""
@@ -61,7 +65,29 @@ def run(
             raise typer.Exit(2)
 
     k = repeats or spec.repeats
-    total = len(suite) * len(spec.arms) * k
+
+    # Resume, because an experiment is an hour or more of model time and the
+    # ways it dies are mundane: a usage limit, a laptop lid, a dropped network.
+    # Losing the completed half to restart the failed half is the kind of cost
+    # that quietly discourages re-running an experiment at all.
+    done: set[tuple[str, str, int]] = set()
+    if resume:
+        done = {
+            record.key
+            for record in results_mod.load(results)
+            if record.executed and not record.error
+        }
+        if done:
+            console.print(f"[dim]resuming: {len(done)} completed run(s) already on disk[/dim]")
+
+    planned = [
+        (task, arm, repeat)
+        for task in suite
+        for repeat in range(k)
+        for arm in spec.arms
+        if (task.name, arm.name, repeat) not in done
+    ]
+    total = len(planned)
     console.print(
         f"[bold]{spec.name}[/bold] spec {spec.digest} · {len(suite)} task(s) x "
         f"{len(spec.arms)} arm(s) x {k} repeat(s) = [bold]{total}[/bold] agent run(s)"
@@ -74,24 +100,34 @@ def run(
         cassettes_dir=results / "cassettes",
         keep_workdirs=keep,
     )
-    done = 0
-    for task in suite:
-        for repeat in range(k):
-            # Arms are interleaved per repeat rather than run in blocks, so a
-            # drift in model behaviour over the hour lands on both arms equally
-            # instead of on whichever one ran last.
-            for arm in spec.arms:
-                done += 1
+    # `planned` interleaves the arms within each repeat rather than running them
+    # in blocks, so a drift in model behaviour over the hour lands on both arms
+    # equally instead of on whichever one ran last.
+    refused = 0
+    for index, (task, arm, repeat) in enumerate(planned, start=1):
+        console.print(f"  [{index}/{total}] {task.name} · {arm.name} · repeat {repeat}", end=" ")
+        record = runner.run_one(task, arm, repeat)
+        results_mod.append(results, record)
+        if not record.executed:
+            refused += 1
+            console.print(f"→ [red]did not run[/red] {record.error}")
+            if refused >= 3:
+                # Three refusals in a row is a wall, not a blip. Continuing
+                # would fill the results file with non-runs and -- before this
+                # was detected -- scored every one of them as a failed task.
                 console.print(
-                    f"  [{done}/{total}] {task.name} · {arm.name} · repeat {repeat}", end=" "
+                    "\n[red]stopping[/red]: three consecutive runs were refused before "
+                    "starting. Nothing further will execute. Re-run with [bold]--resume[/bold] "
+                    "once the limit clears; completed runs are already on disk."
                 )
-                record = runner.run_one(task, arm, repeat)
-                results_mod.append(results, record)
-                verdict = "[green]pass[/green]" if record.task_success else "[red]fail[/red]"
-                note = f" [yellow]{record.error}[/yellow]" if record.error else ""
-                console.print(f"→ {verdict} ({record.duration_s:.0f}s){note}")
+                break
+            continue
+        refused = 0
+        verdict = "[green]pass[/green]" if record.task_success else "[red]fail[/red]"
+        note = f" [yellow]{record.error}[/yellow]" if record.error else ""
+        console.print(f"→ {verdict} ({record.duration_s:.0f}s){note}")
 
-    console.print(f"\nwrote {total} record(s) to {results / results_mod.RESULTS_FILE}")
+    console.print(f"\nwrote to {results / results_mod.RESULTS_FILE}")
     _analyze_and_print(spec, results, markdown=None)
 
 

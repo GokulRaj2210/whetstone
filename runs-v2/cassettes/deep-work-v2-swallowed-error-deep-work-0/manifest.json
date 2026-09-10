@@ -1,18 +1,17 @@
 {
   "agent": "claude-code",
-  "content_hash": "f6b305fba13ee447a84168943dad38962698d68523294e83d2d4476e717902a4",
+  "content_hash": "0aa15353c2ef601dd2d36068d42c12670debb8787fd40c7ca6542353792c3524",
   "format_version": 1,
   "kind": "observed",
   "labels": {
     "available_tools": "27",
     "claude_code_version": "2.1.267",
     "ingested_from": ".whetstone-run.jsonl",
-    "is_error": "true",
-    "num_turns": "1",
+    "num_turns": "15",
     "permissionMode": "default",
-    "reported_cost_usd": "0.000000",
+    "reported_cost_usd": "0.500984",
     "result": "success",
-    "session_id": "d9d185e2-db51-4896-952c-1c3a20754403"
+    "session_id": "634c3471-631b-4fd4-bee1-ab4dd59ad606"
   },
   "model": "claude-opus-5",
   "name": "deep-work-v2-swallowed-error-deep-work-0",
@@ -20,5 +19,5 @@
   "recorder_version": "0.1.0",
   "redactions": 0,
   "source": "claude-code",
-  "wall_duration_ms": 747
+  "wall_duration_ms": 84053
 }
