@@ -1,0 +1,23 @@
+{
+  "agent": "claude-code",
+  "content_hash": "8b194fc116cd05376fcd40c6104d10bb7e69d6d72707592cbea1b80caa736f80",
+  "format_version": 1,
+  "kind": "observed",
+  "labels": {
+    "available_tools": "27",
+    "claude_code_version": "2.1.267",
+    "ingested_from": ".whetstone-run.jsonl",
+    "num_turns": "7",
+    "permissionMode": "default",
+    "reported_cost_usd": "0.173227",
+    "result": "success",
+    "session_id": "b47402c2-469b-4a34-99ac-eab5046b1de0"
+  },
+  "model": "claude-opus-5",
+  "name": "placebo-v1-shared-rounding-control-0",
+  "provider": "anthropic",
+  "recorder_version": "0.1.0",
+  "redactions": 0,
+  "source": "claude-code",
+  "wall_duration_ms": 30710
+}

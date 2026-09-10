@@ -1,0 +1,6 @@
+name: range-boundary
+describes: Off-by-one against a contract that is only written in the docstring.
+verify: python -m pytest -q
+prompt: |
+  `parse_range('1-5')` should cover page 5 but the last page is being dropped
+  when we print. Fix the range parsing.

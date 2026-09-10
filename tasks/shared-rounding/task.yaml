@@ -1,0 +1,7 @@
+name: shared-rounding
+describes: Rounding bug in a shared helper; only one of its two callers is mentioned in the report.
+verify: python -m pytest -q
+prompt: |
+  Customers report that receipt totals are sometimes a penny short. For
+  example, a receipt for items costing 0.145 and 0.145 shows 0.28 instead of
+  0.29. Fix it.

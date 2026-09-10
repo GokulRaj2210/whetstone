@@ -1,0 +1,23 @@
+{
+  "agent": "claude-code",
+  "content_hash": "680387d08572a459f798e703198190c966e8d28ad14192354d3da6b3448e5cea",
+  "format_version": 1,
+  "kind": "observed",
+  "labels": {
+    "available_tools": "27",
+    "claude_code_version": "2.1.267",
+    "ingested_from": ".whetstone-run.jsonl",
+    "num_turns": "10",
+    "permissionMode": "default",
+    "reported_cost_usd": "0.196799",
+    "result": "success",
+    "session_id": "49cf8905-7316-415c-9b24-e8b4dc5ac9af"
+  },
+  "model": "claude-opus-5",
+  "name": "placebo-v1-int-division-placebo-0",
+  "provider": "anthropic",
+  "recorder_version": "0.1.0",
+  "redactions": 0,
+  "source": "claude-code",
+  "wall_duration_ms": 37530
+}

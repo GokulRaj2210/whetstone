@@ -1,0 +1,23 @@
+{
+  "agent": "claude-code",
+  "content_hash": "bc7820fdcf936526214a2bfb42fc462177e4eac2fcd6fa7f0b1a6d05ef91c85c",
+  "format_version": 1,
+  "kind": "observed",
+  "labels": {
+    "available_tools": "27",
+    "claude_code_version": "2.1.267",
+    "ingested_from": ".whetstone-run.jsonl",
+    "num_turns": "8",
+    "permissionMode": "default",
+    "reported_cost_usd": "0.288194",
+    "result": "success",
+    "session_id": "f2fe0b06-d4cf-4cab-bcb2-cf39c111203e"
+  },
+  "model": "claude-opus-5",
+  "name": "deep-work-v1-int-division-control-2",
+  "provider": "anthropic",
+  "recorder_version": "0.1.0",
+  "redactions": 0,
+  "source": "claude-code",
+  "wall_duration_ms": 31636
+}

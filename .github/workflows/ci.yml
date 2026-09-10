@@ -1,0 +1,65 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.11", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - run: uv sync --python ${{ matrix.python }}
+      - name: Tests
+        run: uv run pytest -q
+      - name: Lint
+        run: uv run ruff check .
+      - name: Format
+        run: uv run ruff format --check .
+      - name: Types
+        run: uv run mypy
+
+  # The published numbers must be re-derivable by someone who cannot run the
+  # agent. This job has no `claude` binary, no API key and no network access to
+  # a model -- it re-analyses the committed records and must reproduce the
+  # table in the README exactly.
+  reproduce:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - run: uv sync
+      - name: The experiment declarations are valid
+        run: |
+          uv run whet check experiments/deep-work.yaml
+          uv run whet check experiments/placebo.yaml
+      - name: Re-analyse the committed runs
+        run: |
+          uv run whet report experiments/deep-work.yaml --results runs --md /tmp/report.md
+          uv run whet report experiments/placebo.yaml --results runs-placebo
+      - name: Behavioural metrics still derive from the cassettes
+        # `remeasure --dry-run` recomputes every metric from the stored
+        # transcripts and reports how many differ. Zero is the invariant: if a
+        # metric definition changes without the committed records being
+        # regenerated, the published table is describing something else.
+        run: |
+          uv run whet remeasure --results runs --dry-run | tee /tmp/remeasure.txt
+          grep -q "0 changed" /tmp/remeasure.txt
+      - name: The README's table matches what the records actually say
+        run: uv run python scripts/check_report.py
+      - name: Publish the table to the job summary
+        if: always()
+        run: cat /tmp/report.md >> "$GITHUB_STEP_SUMMARY"

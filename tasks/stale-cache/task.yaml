@@ -1,0 +1,6 @@
+name: stale-cache
+describes: Cache is never invalidated on write; the report mentions only one of the two writers.
+verify: python -m pytest -q
+prompt: |
+  After calling `rename_user`, `get_user` keeps returning the old name until
+  the process restarts. Fix it.

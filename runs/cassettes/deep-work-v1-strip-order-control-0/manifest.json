@@ -1,0 +1,23 @@
+{
+  "agent": "claude-code",
+  "content_hash": "adf0338f5afe2a1061903101204eb7db48f07daaeaf2c74f0945d93bc8766242",
+  "format_version": 1,
+  "kind": "observed",
+  "labels": {
+    "available_tools": "27",
+    "claude_code_version": "2.1.267",
+    "ingested_from": ".whetstone-run.jsonl",
+    "num_turns": "10",
+    "permissionMode": "default",
+    "reported_cost_usd": "0.265593",
+    "result": "success",
+    "session_id": "73e64ee7-b308-406d-a7dc-d39757d49eab"
+  },
+  "model": "claude-opus-5",
+  "name": "deep-work-v1-strip-order-control-0",
+  "provider": "anthropic",
+  "recorder_version": "0.1.0",
+  "redactions": 0,
+  "source": "claude-code",
+  "wall_duration_ms": 80671
+}

@@ -1,0 +1,98 @@
+# Pre-registered before any run. Changing anything below changes the digest,
+# which appears next to every result -- so a revision is allowed, but never
+# silent.
+name: deep-work-v1
+
+alpha: 0.05
+repeats: 3
+timeout_s: 600
+
+arms:
+  # The control must come first and must carry no skill; every difference is
+  # reported as treatment minus baseline.
+  - name: control
+    skill: null
+
+  - name: deep-work
+    skill: deep-work
+    # Declared, not hidden. A skill is normally reached by asking for it, so
+    # this suffix is part of the intervention as users meet it -- and it is also
+    # an uncontrolled prompt change. `placebo.yaml` measures how much of any
+    # effect belongs to the invocation rather than to the skill's contents.
+    prompt_suffix: "Use the deep-work skill."
+
+metrics:
+  # --- primary: what the experiment is actually about ---------------------
+  task_success:
+    kind: binary
+    direction: higher_is_better
+    family: primary
+    rationale: "The hidden test passes. The only claim made about code quality."
+
+  test_run_after_edit:
+    kind: binary
+    direction: higher_is_better
+    family: primary
+    rationale: "Gate 2's signature: did the agent verify the change it made."
+
+  files_read_before_first_edit:
+    kind: continuous
+    direction: higher_is_better
+    family: primary
+    rationale: "Gate 1's signature: reading before editing rather than grep-and-patch."
+
+  # --- exploratory: reported, uncorrected, cannot support a claim ---------
+  #
+  # `verified_after_edit` was added AFTER the first run, and is exploratory for
+  # that reason and no other. Reading the transcripts showed `test_run_after_edit`
+  # measured "ran a test runner" while claiming to measure "checked the change" --
+  # the control arm had been verifying with inline `python3 -c` scripts all
+  # along. The corrected metric is reported because leaving it out would be
+  # worse, and it is exploratory because a metric chosen after seeing the data
+  # cannot confirm anything, however well motivated.
+  verified_after_edit:
+    kind: binary
+    direction: higher_is_better
+    family: exploratory
+    rationale: "Ran the suite OR exercised the change inline - verification by any means."
+
+  test_run_before_edit:
+    kind: binary
+    direction: higher_is_better
+    family: exploratory
+    rationale: "Gate 2's stronger form - a failing signal before the edit, not only after."
+
+  repeat_reads:
+    direction: lower_is_better
+    family: exploratory
+    rationale: "Gate 3: re-reading a file is the symptom of a missing KEEP/DROP ledger."
+
+  dead_end_tool_calls:
+    direction: lower_is_better
+    family: exploratory
+    rationale: "Gate 3: exploration that was fetched, never used, and never dropped."
+
+  searches_before_first_edit:
+    direction: higher_is_better
+    family: exploratory
+    rationale: "Gate 1 asks for the callers to be found; grepping is how that happens."
+
+  files_touched:
+    direction: lower_is_better
+    family: exploratory
+    rationale: "A proxy for scattering the fix rather than fixing the cause."
+
+  total_tokens:
+    direction: lower_is_better
+    family: exploratory
+    rationale: "The cost of the intervention. Reading more is not free."
+
+  tool_calls:
+    direction: lower_is_better
+    family: exploratory
+    rationale: "The other half of the cost - more gates should mean more calls."
+
+  duration_s:
+    direction: lower_is_better
+    family: exploratory
+    rationale: "Wall clock, the cost a user actually feels."

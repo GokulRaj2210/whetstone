@@ -1,0 +1,6 @@
+name: retry-count
+describes: Retry loop makes one more attempt than configured; only visible by counting calls.
+verify: python -m pytest -q
+prompt: |
+  Our upstream provider is rate-limiting us. They say we send more requests
+  than our configured retry limit should allow. Check the retry logic.

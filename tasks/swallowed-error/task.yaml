@@ -1,0 +1,6 @@
+name: swallowed-error
+describes: An exception is swallowed; the documented contract says it should propagate.
+verify: python -m pytest -q
+prompt: |
+  When the config file is malformed, the application starts up with empty
+  settings instead of telling anyone. Make the failure visible.

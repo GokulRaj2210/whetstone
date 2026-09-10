@@ -1,0 +1,6 @@
+name: int-division
+describes: Integer division in a shared statistic; the report names one caller, the hidden test checks the other.
+verify: python -m pytest -q
+prompt: |
+  The dashboard shows an average response time of 0 ms when all the samples
+  are under a second. Fix it.

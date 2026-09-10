@@ -1,0 +1,77 @@
+[project]
+name = "whetstone"
+description = "Measure whether a Claude Code skill actually changes anything: paired A/B runs, pre-registered metrics, honest statistics."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "Gokul Raj" }]
+keywords = ["llm", "agents", "claude-code", "skills", "evaluation", "ab-testing", "statistics"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3.11",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dynamic = ["version"]
+
+# `stats` deliberately has no dependency at all -- not even numpy. The whole
+# statistical argument of this project is that it is checkable, and a reader who
+# has to trust scipy's defaults cannot check it. The rest of the package needs
+# a CLI, YAML, and the capture layer from project 2.
+dependencies = [
+  "agent-flight-recorder @ git+https://github.com/GokulRaj2210/agent-flight-recorder",
+  "pyyaml>=6.0",
+  "rich>=13.7",
+  "typer>=0.12",
+]
+
+[project.scripts]
+whet = "whetstone.cli:app"
+
+[project.urls]
+Homepage = "https://github.com/GokulRaj2210/whetstone"
+Source = "https://github.com/GokulRaj2210/whetstone"
+
+[dependency-groups]
+dev = ["pytest>=8.2", "ruff>=0.5", "mypy>=1.10", "types-PyYAML"]
+
+[tool.hatch.version]
+path = "src/whetstone/__init__.py"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/whetstone"]
+
+[tool.hatch.metadata]
+# Required to allow the direct git reference above.
+allow-direct-references = true
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+# Task fixtures contain deliberately broken code -- a mutable default argument,
+# an unused loop variable, a swallowed exception. Linting them would either fail
+# the build or, worse, tempt someone to "fix" the bug the fixture exists to
+# present. The reference fixes are excluded for symmetry.
+exclude = ["tasks/*/repo", "tasks/*/verify", "tests/reference_fixes"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.mypy]
+files = ["src/whetstone"]
+python_version = "3.12"
+strict = true
+warn_unreachable = true
+
+[[tool.mypy.overrides]]
+module = ["flightrec.*"]
+ignore_missing_imports = true

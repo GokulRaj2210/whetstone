@@ -1,0 +1,24 @@
+{
+  "agent": "claude-code",
+  "content_hash": "252588996f9c4999a497236ba016ef82e3e721e3b7b056be78bd18f4c5115126",
+  "format_version": 1,
+  "kind": "observed",
+  "labels": {
+    "available_tools": "27",
+    "claude_code_version": "2.1.267",
+    "ingested_from": ".whetstone-run.jsonl",
+    "is_error": "true",
+    "num_turns": "1",
+    "permissionMode": "default",
+    "reported_cost_usd": "0.000000",
+    "result": "success",
+    "session_id": "c8603b31-623c-474f-9293-dcb5f55fc4dd"
+  },
+  "model": "claude-opus-5",
+  "name": "placebo-v1-strip-order-control-0",
+  "provider": "anthropic",
+  "recorder_version": "0.1.0",
+  "redactions": 0,
+  "source": "claude-code",
+  "wall_duration_ms": 843
+}

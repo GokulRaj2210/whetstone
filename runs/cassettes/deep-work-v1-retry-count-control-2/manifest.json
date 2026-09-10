@@ -1,0 +1,23 @@
+{
+  "agent": "claude-code",
+  "content_hash": "f7015da5ca37d7f292c11c7fdeaaada42ae9a8fb044e2e6e0ed2d99de5c28917",
+  "format_version": 1,
+  "kind": "observed",
+  "labels": {
+    "available_tools": "27",
+    "claude_code_version": "2.1.267",
+    "ingested_from": ".whetstone-run.jsonl",
+    "num_turns": "5",
+    "permissionMode": "default",
+    "reported_cost_usd": "0.172635",
+    "result": "success",
+    "session_id": "edf09730-6669-486f-8939-0cc5903e1826"
+  },
+  "model": "claude-opus-5",
+  "name": "deep-work-v1-retry-count-control-2",
+  "provider": "anthropic",
+  "recorder_version": "0.1.0",
+  "redactions": 0,
+  "source": "claude-code",
+  "wall_duration_ms": 31345
+}

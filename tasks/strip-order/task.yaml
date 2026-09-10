@@ -1,0 +1,6 @@
+name: strip-order
+describes: Cause is in a shared normaliser; the report describes only the CSV symptom.
+verify: python -m pytest -q
+prompt: |
+  Tags imported from CSV keep their trailing commas, so we end up with a tag
+  called 'urgent,'. Clean that up.

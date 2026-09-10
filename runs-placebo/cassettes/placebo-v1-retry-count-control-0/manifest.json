@@ -1,0 +1,23 @@
+{
+  "agent": "claude-code",
+  "content_hash": "fbc06f77b8b904c402e8ccf225b2e9e2472da7495187164f6a67a53addbfe0f0",
+  "format_version": 1,
+  "kind": "observed",
+  "labels": {
+    "available_tools": "27",
+    "claude_code_version": "2.1.267",
+    "ingested_from": ".whetstone-run.jsonl",
+    "num_turns": "5",
+    "permissionMode": "default",
+    "reported_cost_usd": "0.151166",
+    "result": "success",
+    "session_id": "38d87858-c0b9-482c-ba38-ddca3cea9d77"
+  },
+  "model": "claude-opus-5",
+  "name": "placebo-v1-retry-count-control-0",
+  "provider": "anthropic",
+  "recorder_version": "0.1.0",
+  "redactions": 0,
+  "source": "claude-code",
+  "wall_duration_ms": 22888
+}

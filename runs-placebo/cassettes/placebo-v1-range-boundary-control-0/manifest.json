@@ -1,0 +1,23 @@
+{
+  "agent": "claude-code",
+  "content_hash": "5ab201c68f1693e20622ffa1352e2a9b45b9fc9fbb5c74379361c2074cd279b3",
+  "format_version": 1,
+  "kind": "observed",
+  "labels": {
+    "available_tools": "27",
+    "claude_code_version": "2.1.267",
+    "ingested_from": ".whetstone-run.jsonl",
+    "num_turns": "6",
+    "permissionMode": "default",
+    "reported_cost_usd": "0.136653",
+    "result": "success",
+    "session_id": "6eda73d4-805e-4beb-bf1c-a512d8d82432"
+  },
+  "model": "claude-opus-5",
+  "name": "placebo-v1-range-boundary-control-0",
+  "provider": "anthropic",
+  "recorder_version": "0.1.0",
+  "redactions": 0,
+  "source": "claude-code",
+  "wall_duration_ms": 16405
+}

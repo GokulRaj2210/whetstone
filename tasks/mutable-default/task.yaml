@@ -1,0 +1,7 @@
+name: mutable-default
+describes: Mutable default argument; the obvious fix is at the call site rather than the definition.
+verify: python -m pytest -q
+prompt: |
+  `build_report` returns the wrong sections the second time it is called in
+  the same process - it includes sections from the previous call. Reproduce it
+  and fix it.
