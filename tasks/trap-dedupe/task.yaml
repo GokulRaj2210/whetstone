@@ -1,0 +1,6 @@
+name: trap-dedupe
+describes: Deduplicating with a set fixes the duplicates and destroys the order under test.
+verify: python -m pytest -q
+prompt: |
+  `recent([10, 20, 10])` returns article 10 twice. The recently-viewed
+  list should not repeat entries. Fix it.

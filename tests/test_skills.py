@@ -59,13 +59,24 @@ def test_the_body_stays_within_the_context_budget(skill: Path) -> None:
 
 
 @pytest.mark.parametrize("skill", skill_dirs(), ids=lambda p: p.name)
-def test_referenced_files_exist(skill: Path) -> None:
-    """A dangling `references/x.md` is a dead end mid-task."""
+def test_referenced_files_exist_and_are_addressable(skill: Path) -> None:
+    """A companion file must exist *and* be reachable without searching for it.
+
+    Naming one by bare relative path is what caused this project's largest
+    measurement artifact: the agent could not resolve `references/x.md`, and
+    `Glob` does not return paths under a dot-directory, so it spent ~3.5 tool
+    calls per run hunting the filesystem -- inflating every cost metric and 83%
+    of the one metric that moved the wrong way.
+    """
     _, body = frontmatter(skill / "SKILL.md")
-    for line in body.splitlines():
-        for token in line.split("`"):
-            if token.startswith("references/") and token.endswith(".md"):
-                assert (skill / token).exists(), f"{skill.name} references missing {token}"
+    for token in body.split("`"):
+        if token.endswith(".md") and "references/" in token:
+            assert token.startswith("${CLAUDE_SKILL_DIR}/"), (
+                f"{skill.name} names {token!r} by relative path; the agent cannot resolve "
+                "that and will search for it. Use ${CLAUDE_SKILL_DIR}/."
+            )
+            relative = token.removeprefix("${CLAUDE_SKILL_DIR}/")
+            assert (skill / relative).exists(), f"{skill.name} references missing {relative}"
 
 
 def test_the_deep_work_skill_gates_rather_than_exhorts() -> None:

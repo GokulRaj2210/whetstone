@@ -1,0 +1,6 @@
+name: trap-escape
+describes: Escaping added in the wrong order fixes the report and double-escapes what the visible suite covers.
+verify: python -m pytest -q
+prompt: |
+  Ampersands are not being escaped - a comment containing 'Tom & Jerry'
+  renders the raw ampersand into the page. Fix it.

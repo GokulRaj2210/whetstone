@@ -127,7 +127,11 @@ start editing is strongest.
 
 ## Related
 
-- `references/failure-modes.md` — the failure each gate blocks, and how to
-  recognise it in your own transcript.
-- `references/verification.md` — finding the right test to run in an unfamiliar
-  repo, and what to do when there is no test runner at all.
+Read these only if you need them; the gates above are self-contained. Paths are
+substituted at invocation — use them verbatim rather than searching for the
+files, which live under a dot-directory that `Glob` will not return.
+
+- `${CLAUDE_SKILL_DIR}/references/failure-modes.md` — the failure each gate
+  blocks, and how to recognise it in your own transcript.
+- `${CLAUDE_SKILL_DIR}/references/verification.md` — finding the right test to
+  run in an unfamiliar repo, and what to do when there is no runner at all.

@@ -1,0 +1,6 @@
+name: empty-input
+describes: Crash on empty input; the fix must not disturb the truncation branch already under test.
+verify: python -m pytest -q
+prompt: |
+  `summarise('')` crashes with an IndexError. Users are hitting it on empty
+  input. Fix it.

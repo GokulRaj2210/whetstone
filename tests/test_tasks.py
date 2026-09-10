@@ -27,13 +27,20 @@ FIXES_ROOT = Path(__file__).resolve().parent / "reference_fixes"
 def _run_hidden_tests(task, workdir: Path) -> bool:
     for source in task.verify_dir.iterdir():
         shutil.copy2(source, workdir / source.name)
-    completed = subprocess.run(
-        [sys.executable, "-m", "pytest", "-q", "-p", "no:cacheprovider"],
-        cwd=workdir,
-        capture_output=True,
-        text=True,
-        check=False,
-    )
+    # A timeout, because a broken fixture can hang rather than fail -- an
+    # earlier trap task's bug was an infinite loop, and the suite that was
+    # supposed to catch bad fixtures instead hung on one.
+    try:
+        completed = subprocess.run(
+            [sys.executable, "-m", "pytest", "-q", "-p", "no:cacheprovider"],
+            cwd=workdir,
+            capture_output=True,
+            text=True,
+            check=False,
+            timeout=60,
+        )
+    except subprocess.TimeoutExpired:
+        return False
     return completed.returncode == 0
 
 
@@ -75,8 +82,98 @@ def test_the_task_is_fixable(name: str, tmp_path: Path) -> None:
     )
 
 
+@pytest.mark.parametrize("name", [n for n in task_names() if n.startswith("trap-")])
+def test_a_trap_tasks_visible_suite_starts_green(name: str, tmp_path: Path) -> None:
+    """A regression trap only works if the suite it protects is already passing.
+
+    These tasks exist to test one specific mechanism: the skill runs the
+    project's test suite where the control runs an inline snippet. The trap is a
+    naive fix that silences the reported symptom and breaks a *visible*,
+    currently-passing test. If the suite were already red, breaking it further
+    would be invisible and the task would measure nothing.
+    """
+    task = next(t for t in discover(TASKS_ROOT) if t.name == name)
+    workdir = task.stage(tmp_path)
+    completed = subprocess.run(
+        [sys.executable, "-m", "pytest", "-q", "-p", "no:cacheprovider"],
+        cwd=workdir,
+        capture_output=True,
+        text=True,
+        check=False,
+        timeout=60,
+    )
+    assert completed.returncode == 0, (
+        f"{name}'s visible suite is not green before the fix:\n{completed.stdout[-800:]}"
+    )
+
+
+@pytest.mark.parametrize("name", [n for n in task_names() if n.startswith("trap-")])
+def test_a_trap_task_ships_a_visible_suite(name: str) -> None:
+    task = next(t for t in discover(TASKS_ROOT) if t.name == name)
+    visible = list(task.repo.glob("test_*.py"))
+    assert visible, f"{name} has no visible test file, so there is nothing to break"
+
+
 def test_every_task_declares_what_it_is() -> None:
     """`describes` feeds the README table, so a blank one is a silent gap."""
     for task in discover(TASKS_ROOT):
         assert task.describes, f"{task.name} has no `describes`"
         assert task.prompt.strip(), f"{task.name} has no prompt"
+
+
+NAIVE_ROOT = Path(__file__).resolve().parent / "naive_fixes"
+
+
+def _apply(fix_root: Path, name: str, workdir: Path) -> bool:
+    fix = fix_root / name
+    if not fix.is_dir():
+        return False
+    for source in fix.iterdir():
+        shutil.copy2(source, workdir / source.name)
+    return True
+
+
+def _visible_suite_passes(workdir: Path) -> bool:
+    try:
+        completed = subprocess.run(
+            [sys.executable, "-m", "pytest", "-q", "-p", "no:cacheprovider"],
+            cwd=workdir,
+            capture_output=True,
+            text=True,
+            check=False,
+            timeout=60,
+        )
+    except subprocess.TimeoutExpired:
+        return False
+    return completed.returncode == 0
+
+
+@pytest.mark.parametrize("name", [n for n in task_names() if n.startswith("trap-")])
+def test_the_naive_fix_is_caught_by_running_the_suite(name: str, tmp_path: Path) -> None:
+    """The mechanism the trap tasks exist to test, verified without a model.
+
+    The experiment's finding was that the skill's real effect is running the
+    project's test suite where the control runs an inline snippet checking only
+    the reported case. A task can only detect that if the plausible hurried fix
+    *passes the reported symptom and fails the visible suite*.
+
+    So: apply the naive fix, and assert the visible suite goes red. If it stays
+    green, the task cannot distinguish the arms and it is measuring something
+    else -- which is exactly the mistake the first round of tasks made.
+    """
+    task = next(t for t in discover(TASKS_ROOT) if t.name == name)
+    workdir = task.stage(tmp_path)
+    assert _apply(NAIVE_ROOT, name, workdir), f"{name} has no naive fix to check against"
+    assert not _visible_suite_passes(workdir), (
+        f"{name}: the naive fix leaves the visible suite green, so running it would not "
+        "catch the mistake and the task cannot separate the arms"
+    )
+
+
+@pytest.mark.parametrize("name", [n for n in task_names() if n.startswith("trap-")])
+def test_the_reference_fix_keeps_the_suite_green(name: str, tmp_path: Path) -> None:
+    """The other half: a correct fix must not break the visible suite either."""
+    task = next(t for t in discover(TASKS_ROOT) if t.name == name)
+    workdir = task.stage(tmp_path)
+    assert _apply(FIXES_ROOT, name, workdir)
+    assert _visible_suite_passes(workdir)

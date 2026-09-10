@@ -1,0 +1,6 @@
+name: trap-cache-key
+describes: The obvious fix to the reported collision breaks caching for the case already under test.
+verify: python -m pytest -q
+prompt: |
+  `fetch('/a', {'x': 1})` and `fetch('/a', {'x': 2})` return the same cached
+  body - the params are being ignored in the cache key. Fix it.

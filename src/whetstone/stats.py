@@ -281,6 +281,28 @@ def minimum_detectable_effect(
 # ---------------------------------------------------------------------------
 
 
+def min_pairs_for_binary(alpha: float = DEFAULT_ALPHA) -> int:
+    """Fewest paired tasks that could *ever* resolve a binary metric.
+
+    An exact two-sided McNemar test on `n` discordant pairs bottoms out at
+    ``2 / 2**n`` -- the case where every single pair flipped the same way. Below
+    the `n` where that reaches `alpha`, no result is achievable: a clean sweep
+    of every task still reports "unresolved", and the experiment cannot answer
+    its own question however it comes out.
+
+    At the conventional alpha this is **6**. Five tasks flipping five times out
+    of five gives p = 0.0625, which is the single most commonly over-read number
+    in small-sample work.
+
+    Worth knowing before spending an hour of model time rather than after, which
+    is why `whet check` refuses to stay quiet about it.
+    """
+    pairs = 1
+    while 2.0 ** (1 - pairs) > alpha and pairs < 64:
+        pairs += 1
+    return pairs
+
+
 def estimate_continuous(
     metric: str,
     baseline: Sequence[float],
@@ -450,6 +472,7 @@ __all__ = [
     "estimate_continuous",
     "holm_bonferroni",
     "mcnemar_exact",
+    "min_pairs_for_binary",
     "minimum_detectable_effect",
     "paired_bootstrap",
 ]

@@ -1,0 +1,6 @@
+name: trap-sort-stability
+describes: Reversing the comparison fixes the reported order and breaks the tie-break already tested.
+verify: python -m pytest -q
+prompt: |
+  The leaderboard shows the lowest scores first. It should show the highest
+  first. Fix it.

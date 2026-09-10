@@ -1,0 +1,6 @@
+name: trap-titlecase
+describes: str.title() fixes the reported casing and mangles the apostrophes already tested.
+verify: python -m pytest -q
+prompt: |
+  Author names are displayed all lowercase - 'ada lovelace' should render as
+  'Ada Lovelace'. Fix it.

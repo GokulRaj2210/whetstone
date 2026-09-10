@@ -1,0 +1,6 @@
+name: trap-slug
+describes: Stripping punctuation after hyphenation also strips the hyphens the visible suite checks.
+verify: python -m pytest -q
+prompt: |
+  slug('Hello, World') returns 'hello,-world' - the comma should not be in a
+  URL. Fix it.

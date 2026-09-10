@@ -19,6 +19,7 @@ from whetstone.analyze import analyze
 from whetstone.capture import Runner, available
 from whetstone.report import console_report, markdown_report
 from whetstone.spec import Experiment, SpecError
+from whetstone.stats import min_pairs_for_binary
 from whetstone.tasks import TaskError, discover
 
 app = typer.Typer(add_completion=False, help=__doc__)
@@ -177,7 +178,10 @@ def remeasure(
 
 
 @app.command()
-def check(experiment: ExperimentArg) -> None:
+def check(
+    experiment: ExperimentArg,
+    tasks_dir: Annotated[Path, typer.Option("--tasks", "-t")] = Path("tasks"),
+) -> None:
     """Validate an experiment and print its digest, before spending anything."""
     spec = _load(experiment)
     console.print(f"[green]valid[/green] · {spec.name} · spec [bold]{spec.digest}[/bold]")
@@ -187,6 +191,29 @@ def check(experiment: ExperimentArg) -> None:
     )
     for metric in spec.metrics:
         console.print(f"  [dim]{metric.kind:10}[/dim] {metric.name:32} {metric.rationale}")
+
+    # The check worth doing before an hour of model time rather than after.
+    binary = [m for m in spec.primary if m.is_binary]
+    if binary:
+        floor = min_pairs_for_binary(spec.alpha)
+        try:
+            available = len(discover(tasks_dir))
+        except TaskError:
+            available = 0
+        names = ", ".join(m.name for m in binary)
+        if available and available < floor:
+            console.print(
+                f"\n[red]underpowered[/red]: {available} task(s) cannot resolve a binary "
+                f"metric ({names}) at alpha {spec.alpha}. An exact two-sided McNemar test "
+                f"bottoms out at 2/2^n, so it needs at least [bold]{floor}[/bold] paired "
+                "tasks even if every one of them flips. Add tasks, or expect an unresolvable "
+                "experiment."
+            )
+        elif available:
+            console.print(
+                f"\n[green]powered[/green]: {available} tasks vs a floor of {floor} for the "
+                f"binary primary metric(s) ({names})."
+            )
 
 
 def _load(path: Path) -> Experiment:
