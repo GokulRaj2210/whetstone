@@ -138,9 +138,7 @@ def test_adding_a_metric_does_not_invalidate_existing_runs(tmp_path: Path) -> No
     was found in -- which rewards leaving it alone.
     """
     before = Experiment.load(write(tmp_path, MINIMAL))
-    after = Experiment.load(
-        write(tmp_path, MINIMAL + "  added:\n    rationale: found later\n")
-    )
+    after = Experiment.load(write(tmp_path, MINIMAL + "  added:\n    rationale: found later\n"))
     assert before.run_digest == after.run_digest, "the runs were not affected"
     assert before.digest != after.digest, "but the analysis was, and it must show"
 
