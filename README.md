@@ -23,10 +23,12 @@ uv run whet report experiments/deep-work.yaml     # no model, no key, no network
 
 ### What the experiment found
 
-**The skill changes how the agent works, decisively, and the change is due to
-what it says rather than to the act of invoking it. It did not make the agent
-verify its work — it changed the method — and whether any of this produces
-better code is not something this experiment could answer.**
+**The skill reliably produces a regression test where the control produced
+none, and that is attributable to what it says rather than to the act of
+invoking it. It did not make the agent verify its work — both arms already did,
+and it changed the method. Whether any of this yields better code is not
+something this experiment could answer, and on the single task that could have
+discriminated, it did not help.**
 
 Both of those qualifications were discovered *after* the first writeup, by
 reading the transcripts instead of the summary table. They are the most useful
@@ -100,6 +102,37 @@ Two pieces of the design earned their keep here:
 `verified_after_edit` is **exploratory**, for one reason only: it was chosen
 after the data was seen. A metric picked with hindsight cannot confirm anything,
 however well motivated it is.
+
+#### The clearest thing it did
+
+`files_touched` went 1.33 -> 2.33, which read at first like the fix being
+scattered across more files. It is the opposite:
+
+| across 24 runs | source files edited | test files written |
+|---|--:|--:|
+| control | 32 | **0** |
+| deep-work | 32 | **24** |
+
+The source edits are identical in number. The entire increase is **a regression
+test, written in 24 of 24 runs**, with the suite run afterwards in 22 of them.
+The control arm wrote a test zero times.
+
+That is the narrow, defensible claim this experiment supports: the skill
+converts throwaway verification into a committed regression test - one that
+covers the cases the bug report did not mention - at roughly 3x the tokens.
+Whether that trade is worth making depends entirely on whether you wanted the
+test.
+
+#### The pointed negative
+
+`strip-order` is the one task whose contract exists only in a docstring
+(`"""...trim, lowercase, drop punctuation"""`) while the prompt mentions only
+trailing commas. It is precisely the case Gate 1 - read the file in full before
+editing - was written for.
+
+It failed **0/3 in both arms.** The skill's extra reading did not translate into
+catching the wider contract. One task is not much evidence, but it is the only
+task in the suite that could have discriminated, and it did not.
 
 #### What did resolve
 
