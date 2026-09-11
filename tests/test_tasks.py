@@ -177,3 +177,25 @@ def test_the_reference_fix_keeps_the_suite_green(name: str, tmp_path: Path) -> N
     workdir = task.stage(tmp_path)
     assert _apply(FIXES_ROOT, name, workdir)
     assert _visible_suite_passes(workdir)
+
+
+def test_a_hidden_test_may_not_demand_more_than_the_prompt_asks() -> None:
+    """A fixture must be satisfiable by a competent reading of its own prompt.
+
+    `masking-bug` was deleted for failing this. Its prompt reported that
+    trailing spaces were accepted; the agent fixed exactly that, correctly, and
+    the hidden test then failed it for not also adding a minimum-length check
+    nobody had mentioned. The task scored 0/2 in calibration and would have read
+    as a hard task the skill could not help with, when it was simply unfair.
+
+    There is no automatic check for this -- fairness is a judgement about
+    whether the prompt implies the contract. What is asserted here is the
+    weaker, checkable thing: every task ships a reference fix, and that fix is
+    the *documented* correct behaviour rather than a guess at the hidden test.
+    """
+    for task in discover(TASKS_ROOT):
+        fix = FIXES_ROOT / task.name
+        assert fix.is_dir(), (
+            f"{task.name} has no reference fix. Writing one is what surfaces a hidden test "
+            "that demands more than the prompt asks for."
+        )

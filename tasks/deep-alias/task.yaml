@@ -1,0 +1,6 @@
+name: deep-alias
+describes: Shallow copy shares nested state; the report names the symptom, not the aliasing.
+verify: python -m pytest -q
+prompt: |
+  Editing a cloned config changes the original. `base.clone()` then setting
+  `clone['db']['host']` also changes `base['db']['host']`. Fix it.

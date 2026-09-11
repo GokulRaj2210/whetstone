@@ -127,11 +127,15 @@ start editing is strongest.
 
 ## Related
 
-Read these only if you need them; the gates above are self-contained. Paths are
-substituted at invocation — use them verbatim rather than searching for the
-files, which live under a dot-directory that `Glob` will not return.
+Two reference files sit beside this one, and **you do not need them to follow
+the gates above** — the gates are self-contained. Read them only if the user
+asks why a gate exists, and only if you already know where they are.
 
-- `${CLAUDE_SKILL_DIR}/references/failure-modes.md` — the failure each gate
-  blocks, and how to recognise it in your own transcript.
-- `${CLAUDE_SKILL_DIR}/references/verification.md` — finding the right test to
-  run in an unfamiliar repo, and what to do when there is no runner at all.
+Do not go looking for them. Measured across 39 runs of this skill, searching for
+its own files cost ~3.2 tool calls per run — a quarter of all tool use — because
+project-local skills live under a dot-directory that `Glob` does not return and
+`${CLAUDE_SKILL_DIR}` is not substituted for them. Every one of those calls is
+context spent on nothing, which is the exact failure Gate 3 exists to prevent.
+
+- `references/failure-modes.md` — the failure each gate blocks.
+- `references/verification.md` — finding the right test in an unfamiliar repo.

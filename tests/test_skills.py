@@ -71,12 +71,29 @@ def test_referenced_files_exist_and_are_addressable(skill: Path) -> None:
     _, body = frontmatter(skill / "SKILL.md")
     for token in body.split("`"):
         if token.endswith(".md") and "references/" in token:
-            assert token.startswith("${CLAUDE_SKILL_DIR}/"), (
-                f"{skill.name} names {token!r} by relative path; the agent cannot resolve "
-                "that and will search for it. Use ${CLAUDE_SKILL_DIR}/."
-            )
             relative = token.removeprefix("${CLAUDE_SKILL_DIR}/")
             assert (skill / relative).exists(), f"{skill.name} references missing {relative}"
+
+
+@pytest.mark.parametrize("skill", skill_dirs(), ids=lambda p: p.name)
+def test_a_skill_that_names_companion_files_tells_the_agent_not_to_hunt(skill: Path) -> None:
+    """Naming a file the agent cannot resolve is an invitation to search for it.
+
+    Measured across 39 runs, hunting for the skill's own files cost ~3.2 tool
+    calls per run -- a quarter of all tool use in the treatment arm. Neither a
+    bare relative path nor `${CLAUDE_SKILL_DIR}` resolves for a project-local
+    skill: it lives under a dot-directory `Glob` will not return, and the
+    variable is only substituted for plugin skills. So a skill that mentions its
+    companions must say plainly that they are optional and not to be searched
+    for.
+    """
+    _, body = frontmatter(skill / "SKILL.md")
+    if "references/" not in body:
+        return
+    lowered = body.lower()
+    assert "do not go looking" in lowered or "do not search" in lowered, (
+        f"{skill.name} names companion files without telling the agent not to hunt for them"
+    )
 
 
 def test_the_deep_work_skill_gates_rather_than_exhorts() -> None:

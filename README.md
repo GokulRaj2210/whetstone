@@ -306,6 +306,83 @@ now points at.
 
 ---
 
+## <a name="v3"></a>v3: the experiment that could not be built
+
+v2 ended with a clear next step: correctness sits at a ceiling — the baseline
+succeeds on ~90% of these tasks — so nothing can be measured until the tasks are
+hard enough that it sometimes fails. v3 set out to build those tasks.
+
+It added the step both earlier rounds needed and neither had:
+
+```
+$ whet calibrate experiments/deep-work-v2.yaml --tasks candidates -k 3
+
+task                      baseline  verdict
+deep-alias                     3/3  too easy - no room to improve
+inverted-predicate             3/3  too easy - no room to improve
+masking-bug                    0/2  too hard - no room to improve
+
+0 of 5 task(s) inside the 30%-70% band.
+not enough: a binary primary metric needs at least 6 usable tasks before any
+result is achievable. Write harder or easier tasks rather than running an
+experiment that cannot answer its question.
+```
+
+Calibration runs the control arm only, so it is cheap, and it answers the
+question v1 spent a whole experiment discovering: *can this task show a
+difference at all?* A task the baseline always passes cannot. Neither can one it
+always fails.
+
+### The finding
+
+**Zero of five candidates landed in the usable band**, and they were written
+specifically to be harder — shallow-copy aliasing across three modules, an
+inverted predicate with one caller compensating for it, a red herring in the
+bug report. The agent either solved them outright or could not.
+
+That is v3's result, and it is about experiment design rather than about the
+skill: **on small, well-specified bugs, agent performance is close to bimodal.**
+There is very little difficulty band between "reads the file and fixes it" and
+"cannot". Every attempt this project made to manufacture a middle — v1's shared
+helpers, v2's regression traps, v3's indirection — landed on one side or the
+other.
+
+`masking-bug` is the instructive failure. It scored 0/2 and looked like a hard
+task, and it was simply unfair: the prompt reported that trailing spaces were
+accepted, the agent fixed exactly that, correctly, and the hidden test failed it
+for not also adding a minimum-length check nobody had asked for. It has been
+deleted. Writing the reference fix is what surfaces this — a fix that satisfies
+the documented behaviour but not the hidden test is the signal that the test is
+asking for something the prompt does not imply.
+
+### What would actually be needed
+
+Difficulty that comes from **size and mess**, not from cleverness. A bug in a
+few thousand lines across a dozen modules, with a misleading comment, a
+half-finished refactor and no tests — the conditions under which reading before
+editing plausibly matters — rather than a subtle bug in forty lines, where a
+competent agent reads the whole file either way.
+
+That is a substantially larger fixture-building effort than this project has
+spent so far, and it is the honest prerequisite for answering the correctness
+question rather than another round of guessing at task design.
+
+### Where that leaves the whole thing
+
+| Claim | Status |
+|---|---|
+| The skill changes behaviour | **Established**, twice, independently |
+| The change is content, not invocation | **Established** (placebo arm) |
+| It writes a regression test the control never writes | **Established** (24/24, then 7/8) |
+| Its effect is conditional on the repo having no tests | **Strong**, post-hoc (7/7 vs 0/8) |
+| It improves correctness | **No evidence**, direction mildly negative, and not testable on tasks of this size |
+
+The tool now refuses to let that last row be faked. `whet calibrate` says in
+advance when an experiment cannot answer its question, and this is the first
+round where it did.
+
+---
+
 ## The `deep-work` skill
 
 The framing hazard first, because it is the reason most skills like this do
@@ -414,6 +491,18 @@ Two fixture bugs the same discipline caught: an early trap's bug was an infinite
 loop, which hung the very suite meant to catch bad fixtures; and `trap-dedupe`
 originally used strings, where `list(set(...))` ordering is hash-randomised and
 the trap would have been intermittently green.
+
+### Calibrate the tasks before running anything
+
+`whet calibrate` runs the **control arm only** and reports which tasks can show
+a difference at all. A task the baseline always passes has no room to improve; a
+task it always fails has none either. Both are invisible in a results table and
+fatal to it.
+
+v1 discovered this by spending a whole experiment on tasks that were all one or
+the other. v3 discovered something worse: on small, well-specified bugs, **zero
+of five deliberately harder candidates landed in the usable band.** Agent
+performance on this kind of task is close to bimodal.
 
 ### Know whether the experiment can answer anything, first
 

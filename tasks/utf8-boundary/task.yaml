@@ -1,0 +1,6 @@
+name: utf8-boundary
+describes: Truncation splits a multi-byte character; the report only mentions length.
+verify: python -m pytest -q
+prompt: |
+  Push notification bodies longer than 40 bytes are rejected by the provider.
+  Truncate them to fit.

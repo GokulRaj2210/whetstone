@@ -1,0 +1,6 @@
+name: inverted-predicate
+describes: A predicate returns the opposite of its name; one caller compensates, one does not.
+verify: python -m pytest -q
+prompt: |
+  Jobs that have exhausted their attempts are being retried forever.
+  `worker.run_job` keeps rescheduling them. Fix it.

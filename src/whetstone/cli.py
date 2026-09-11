@@ -13,6 +13,7 @@ from typing import Annotated
 
 import typer
 from rich.console import Console
+from rich.table import Table
 
 from whetstone import results as results_mod
 from whetstone.analyze import analyze
@@ -139,6 +140,102 @@ def report(
 ) -> None:
     """Analyse recorded runs. No model, no key, no network."""
     _analyze_and_print(_load(experiment), results, markdown=markdown)
+
+
+@app.command()
+def calibrate(
+    experiment: ExperimentArg,
+    tasks: Annotated[Path, typer.Option("--tasks", "-t")] = Path("tasks"),
+    results: ResultsOpt = Path("runs-calibration"),
+    repeats: Annotated[int, typer.Option("--repeats", "-k")] = 3,
+    low: Annotated[float, typer.Option("--low", help="Lower edge of the useful band.")] = 0.3,
+    high: Annotated[float, typer.Option("--high", help="Upper edge.")] = 0.7,
+) -> None:
+    """Run the CONTROL arm only, and report which tasks can show a difference.
+
+    The step both of this project's own experiments needed and neither had.
+
+    A task the baseline always passes cannot show an improvement; a task it
+    always fails cannot either. v1 discovered this the expensive way -- every
+    one of its tasks was passed by both arms or failed by both, so the outcome
+    metric was structurally incapable of moving, and it took a full experiment
+    to find out.
+
+    Calibration is cheap because it runs one arm. Keep the tasks whose baseline
+    success falls inside the band, and an experiment built on them can at least
+    answer its own question.
+    """
+    spec = _load(experiment)
+    if not available():
+        errors.print("[red]`claude` is not on PATH.[/red]")
+        raise typer.Exit(2)
+    try:
+        suite = discover(tasks)
+    except TaskError as exc:
+        errors.print(f"[red]{exc}[/red]")
+        raise typer.Exit(2) from exc
+
+    control = spec.baseline
+    runner = Runner(
+        experiment=spec,
+        skills_root=Path("skills"),
+        results_dir=results,
+        cassettes_dir=results / "cassettes",
+    )
+    console.print(
+        f"calibrating {len(suite)} task(s) x {repeats} control run(s) = "
+        f"[bold]{len(suite) * repeats}[/bold] runs (one arm only)"
+    )
+
+    outcomes: dict[str, list[bool]] = {}
+    refused = 0
+    for task in suite:
+        for repeat in range(repeats):
+            record = runner.run_one(task, control, repeat)
+            results_mod.append(results, record)
+            if not record.executed:
+                refused += 1
+                if refused >= 3:
+                    console.print("[red]stopping[/red]: three consecutive refusals.")
+                    break
+                continue
+            refused = 0
+            outcomes.setdefault(task.name, []).append(record.task_success)
+        else:
+            continue
+        break
+
+    table = Table(box=None, pad_edge=False)
+    table.add_column("task", no_wrap=True, min_width=24)
+    table.add_column("baseline", justify="right")
+    table.add_column("verdict")
+    usable = 0
+    for task in suite:
+        got = outcomes.get(task.name)
+        if not got:
+            table.add_row(task.name, "—", "[dim]not run[/dim]")
+            continue
+        rate = sum(got) / len(got)
+        if rate > high:
+            verdict = "[yellow]too easy[/yellow] — no room to improve"
+        elif rate < low:
+            verdict = "[yellow]too hard[/yellow] — no room to improve"
+        else:
+            verdict = "[green]usable[/green]"
+            usable += 1
+        table.add_row(task.name, f"{sum(got)}/{len(got)}", verdict)
+    console.print()
+    console.print(table)
+    console.print(
+        f"\n[bold]{usable}[/bold] of {len(suite)} task(s) inside the {low:.0%}-{high:.0%} band."
+    )
+    floor = min_pairs_for_binary(spec.alpha)
+    if usable < floor:
+        console.print(
+            f"[red]not enough[/red]: a binary primary metric needs at least {floor} usable "
+            "tasks before any result is achievable. Write harder or easier tasks rather than "
+            "running an experiment that cannot answer its question."
+        )
 
 
 @app.command()

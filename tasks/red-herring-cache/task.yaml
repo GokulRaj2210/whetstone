@@ -1,0 +1,6 @@
+name: red-herring-cache
+describes: The report blames staleness; the cache never hits at all because the key moves.
+verify: python -m pytest -q
+prompt: |
+  The rate limiter is serving stale counts - users are getting through after
+  they should be blocked. The cache seems to be holding old values. Fix it.
